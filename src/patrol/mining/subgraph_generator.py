@@ -138,18 +138,41 @@ class SubgraphGenerator:
 
         return GraphPayload(nodes=nodes, edges=edges)
 
+    def generate_graph(self, target_address: str) -> GraphPayload:
 
-    async def run(self, target_address:str, target_block:int, max_block_number: int):
+        import os
+        import json
+        # logging Atel
+        with open('/space/received_coldkeys.txt', 'a') as file:
+            file.write(f'{target_address}\n')
 
-        block_numbers = await self.generate_block_numbers(target_block, upper_block_limit=max_block_number)
+        db_base_path = '/workspace/DB/coldkey-graphs'
+        
+        file_path = os.path.join(db_base_path, f'{target_address}.json')  # you will need to create this by running event_fetcher and saving the output.
+        if os.path.exists(file_path):
+            with open(file_path, "r") as f:
+                data = json.load(f)
+            
+            with open('/space/received_coldkeys.txt', 'a') as file:
+                file.write(f'{target_address} {len(data.get("nodes"))} {len(data.get("edges"))} in DB\n')
+            return GraphPayload(nodes=data.get('nodes'), edges=data.get('edges'))
 
-        events = await self.event_fetcher.fetch_all_events(block_numbers)
-
-        processed_events = await self.event_processor.process_event_data(events)
-
-        adjacency_graph = self.generate_adjacency_graph_from_events(processed_events)
-
-        subgraph = self.generate_subgraph_from_adjacency_graph(adjacency_graph, target_address)
+        else:
+            with open('/space/not_in_db_received_coldkeys.txt', 'a') as file:
+                file.write(f'{target_address} {len(data.get("nodes"))} {len(data.get("edges"))} in DB\n')
+            print("Failed in loading Graph, now generating...")
+            nodes = [
+                {
+                    "id": target_address,
+                    "type": "wallet",
+                    "origin": "bittensor"
+                }
+            ]
+            edges = []
+            return GraphPayload(nodes=nodes, edges=edges)
+        
+    async def run(self, target_address:str, target_block:int, max_block_number: int):        
+        subgraph = self.generate_graph(target_address)
 
         return subgraph
 

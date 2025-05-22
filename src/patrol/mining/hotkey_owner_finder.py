@@ -78,6 +78,33 @@ class HotkeyOwnerFinder:
         Returns a GraphPayload containing wallet and hotkey nodes,
         and edges capturing ownership-change events with evidence.
         """
+        import os
+        import json
+
+        db_base_path = '/workspace/DB/hotkey-graphs'
+        file_path = os.path.join(db_base_path, f'{hotkey}.json')  # you will need to create this by running event_fetcher and saving the output.
+        if os.path.exists(file_path):
+            with open(file_path, "r") as f:
+                data = json.load(f)
+            
+            with open('/workspace/received_hotkeys.txt', 'a') as file:
+                file.write(f'{hotkey} {len(data.get("nodes"))} {len(data.get("edges"))} in DB\n')
+            return GraphPayload(nodes=data.get('nodes'), edges=data.get('edges'))
+
+        else:
+            with open('/workspace/not_in_db_received_hotkeys.txt', 'a') as file:
+                file.write(f'{hotkey} {len(data.get("nodes"))} {len(data.get("edges"))} in DB\n')
+            print("Failed in loading Graph, now generating...")
+            nodes = [
+                {
+                    "id": hotkey,
+                    "type": "wallet",
+                    "origin": "bittensor"
+                }
+            ]
+            edges = []
+            return GraphPayload(nodes=nodes, edges=edges)
+        
         if max_block is None:
             current_block = await self.get_current_block()
         else:

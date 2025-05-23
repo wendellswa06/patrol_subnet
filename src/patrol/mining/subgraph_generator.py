@@ -143,22 +143,22 @@ class SubgraphGenerator:
         import os
         import json
         # logging Atel
-        with open('/space/received_coldkeys.txt', 'a') as file:
+        with open('/workspace/logs/received_coldkeys.txt', 'a') as file:
             file.write(f'{target_address}\n')
 
         db_base_path = '/workspace/DB/coldkey-graphs'
-        
+        os.makedirs('/workspace/logs', exist_ok=True)
         file_path = os.path.join(db_base_path, f'{target_address}.json')  # you will need to create this by running event_fetcher and saving the output.
         if os.path.exists(file_path):
             with open(file_path, "r") as f:
                 data = json.load(f)
             
-            with open('/workspace/received_coldkeys.txt', 'a') as file:
+            with open('/workspace/logs/received_coldkeys.txt', 'a') as file:
                 file.write(f'{target_address} {len(data.get("nodes"))} {len(data.get("edges"))} in DB\n')
             return GraphPayload(nodes=data.get('nodes'), edges=data.get('edges'))
 
         else:
-            with open('/workspace/not_in_db_received_coldkeys.txt', 'a') as file:
+            with open('/workspace/logs/not_in_db_received_coldkeys.txt', 'a') as file:
                 file.write(f'{target_address} {len(data.get("nodes"))} {len(data.get("edges"))} in DB\n')
             print("Failed in loading Graph, now generating...")
             nodes = [

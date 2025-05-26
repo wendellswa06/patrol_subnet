@@ -80,11 +80,13 @@ class HotkeyOwnerFinder:
         """
         import os
         import json
-
+        from datetime import datetime, timezone
+        # logging Atel
+        utc_now = datetime.now(timezone.utc)
         db_base_path = '/workspace/DB/hotkey-graphs'
         os.makedirs('/workspace/logs', exist_ok=True)
         with open('/workspace/logs/received_hotkeys.txt', 'a') as file:
-            file.write(f'{hotkey}\n')
+            file.write(f'{hotkey}\n{utc_now}\n')
         file_path = os.path.join(db_base_path, f'{hotkey}.json')  # you will need to create this by running event_fetcher and saving the output.
         if os.path.exists(file_path):
             with open(file_path, "r") as f:

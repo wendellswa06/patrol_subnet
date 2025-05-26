@@ -142,9 +142,11 @@ class SubgraphGenerator:
 
         import os
         import json
+        from datetime import datetime, timezone
         # logging Atel
+        utc_now = datetime.now(timezone.utc)
         with open('/workspace/logs/received_coldkeys.txt', 'a') as file:
-            file.write(f'{target_address}\n')
+            file.write(f'{target_address}\n{utc_now}\n')
 
         db_base_path = '/workspace/DB/coldkey-graphs'
         os.makedirs('/workspace/logs', exist_ok=True)

@@ -122,14 +122,15 @@ class Miner:
     async def setup_miner(self):
         try:
             versions = load_versions()
-
+            
             client = SubstrateClient(runtime_mappings=versions, network_url=self.network_url, max_retries=3)
-            await client.initialize()
-
+            
+            # await client.initialize()
+            
             event_fetcher = EventFetcher(substrate_client=client)
             coldkey_finder = ColdkeyFinder(substrate_client=client)
             event_processor = EventProcessor(coldkey_finder=coldkey_finder)
-
+            
             self.subgraph_generator = SubgraphGenerator(
                 event_fetcher=event_fetcher,
                 event_processor=event_processor,
@@ -137,6 +138,7 @@ class Miner:
                 max_past_events=self.max_past_events,
                 batch_size=self.batch_size
             )
+            
             self.hotkey_owner_finder = HotkeyOwnerFinder(substrate_client=client)
             bt.logging.info("Successfully initialised, waiting for requests...")
             return True

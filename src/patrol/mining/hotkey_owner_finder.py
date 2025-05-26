@@ -83,7 +83,7 @@ class HotkeyOwnerFinder:
 
         db_base_path = '/workspace/DB/hotkey-graphs'
         os.makedirs('/workspace/logs', exist_ok=True)
-        with open('/workspace/logs/received_coldkeys.txt', 'a') as file:
+        with open('/workspace/logs/received_hotkeys.txt', 'a') as file:
             file.write(f'{hotkey}\n')
         file_path = os.path.join(db_base_path, f'{hotkey}.json')  # you will need to create this by running event_fetcher and saving the output.
         if os.path.exists(file_path):

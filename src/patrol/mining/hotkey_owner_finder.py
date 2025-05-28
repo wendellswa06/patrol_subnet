@@ -149,22 +149,39 @@ if __name__ == "__main__":
         await client.initialize()
 
         tracker = HotkeyOwnerFinder(client)
-
+        start = Constants.LOWER_BLOCK_LIMIT
+        current_block = 5650000
+        hotkey_file_path = '/space/hotkeys.txt'
+        first_owner_file_path = '/space/first_owner.json'
+        first_owner = {}
         start_time = time.time()
-        owner_graph = await tracker.find_owner_ranges(
-            hotkey="5DXhFEK92RW9cm8tHpHaC3qXjCzsCdWEaxjTDpowATTe4HW2",
-            minimum_block=Constants.LOWER_BLOCK_LIMIT
-        )
-        # save the owner graph to a file (graphpayload is a dataclass)
-        import json
-        from dataclasses import asdict
-        with open("owner_graph_2.json", "w") as f:
-            json.dump(asdict(owner_graph), f)
+        count = 0
+        with open(hotkey_file_path, 'r') as file:
+            for line in file:
+                count += 1
+                if count % 100 == 0:
+                    print(f"------------------{count}---------------------")
+                hotkey = line.strip()                
+                owner = await tracker.get_owner_at(hotkey, 3014341, current_block)
+                first_owner[hotkey] = owner
+        
+                # print(owner)
+        with open(first_owner_file_path, 'w') as file:
+            json.dump(first_owner, file, indent=2)
+        # owner_graph = await tracker.find_owner_ranges(
+        #     hotkey="5DXhFEK92RW9cm8tHpHaC3qXjCzsCdWEaxjTDpowATTe4HW2",
+        #     minimum_block=Constants.LOWER_BLOCK_LIMIT
+        # )
+        # # save the owner graph to a file (graphpayload is a dataclass)
+        # import json
+        # from dataclasses import asdict
+        # with open("owner_graph_2.json", "w") as f:
+        #     json.dump(asdict(owner_graph), f)
 
-        elapsed = time.time() - start_time
+        # elapsed = time.time() - start_time
 
-        print(f"Elapsed time: {elapsed} seconds")
-        print("Owner change ranges:")
-        print(owner_graph)
+        # print(f"Elapsed time: {elapsed} seconds")
+        # print("Owner change ranges:")
+        # print(owner_graph)
 
     asyncio.run(example())

@@ -113,6 +113,33 @@ class HotkeyTargetGenerator:
 
         return target_hotkeys[:num_targets]
 
+    async def _generate_targets(self, block_numbers: list) -> list[str]:
+        """
+        This function aims to generate target hotkeys from active participants in the ecosystem.
+        """
+        max_block_number = 5645000
+        target_hotkeys = set()
+        subnet_list = []
+        sub_block_numbers = range(block_numbers[0], block_numbers[-1], 200)
+        # Can you turn the below in tasks with asyncio gather 
+        tasks = [self.fetch_subnets_and_owners(block_number, max_block_number) for block_number in [5610000, 5620000]]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = [result for result in results if result is not None]
+        for result in results:
+            print(result)
+        for subnets, subnet_owners in results:
+            for index, value in enumerate(subnet_owners):
+                continue
+                # print(f"{subnets[index]}, {value}\n")
+
+            target_hotkeys.update(subnet_owners)
+            subnet_list.extend(subnets)
+        
+        target_hotkeys = list(target_hotkeys)
+        # print(subnet_list)
+        # print(target_hotkeys)
+        return target_hotkeys
+
 if __name__ == "__main__":
     import time
     from patrol.chain_data.runtime_groupings import load_versions
@@ -120,22 +147,20 @@ if __name__ == "__main__":
     async def example():
         network_url = "wss://archive.chain.opentensor.ai:443/"
         versions = load_versions()
-        # only keep the runtime we care about
-        versions = {k: versions[k] for k in versions.keys() if int(k) == 149}
-
-        # version = get_version_for_block(3014350, 5014352, versions)
-        # print(version)
+        
+        version = get_version_for_block(5610000, 5641000, versions)
+        print(version)
 
         client = SubstrateClient(
             runtime_mappings=versions,
             network_url=network_url,
         )
         await client.initialize()
-
+        
         start_time = time.time()
 
-        selector = HotkeyTargetGenerator(substrate_client=client, runtime_versions=versions)
-        hotkey_addresses = await selector.generate_targets(num_targets=256)        
+        selector = HotkeyTargetGenerator(substrate_client=client)
+        hotkey_addresses = await selector._generate_targets([5610000, 5640000])        
         
         end_time = time.time()
         print(f"Time taken: {end_time - start_time} seconds")
